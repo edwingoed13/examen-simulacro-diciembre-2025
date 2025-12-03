@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>SIMULACRO CEPREUNA 2025</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -150,7 +153,14 @@
             }
 
             try {
-                const response = await fetch(API_URL);
+                // Agregar timestamp para evitar caché
+                const cacheBuster = `?t=${Date.now()}`;
+                const response = await fetch(API_URL + cacheBuster, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache'
+                    }
+                });
 
                 if (!response.ok) {
                     throw new Error('Error al obtener datos');
@@ -199,7 +209,14 @@
 
         async function fetchAreaData() {
             try {
-                const response = await fetch(API_AREAS_URL);
+                // Agregar timestamp para evitar caché
+                const cacheBuster = `?t=${Date.now()}`;
+                const response = await fetch(API_AREAS_URL + cacheBuster, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache'
+                    }
+                });
 
                 if (!response.ok) {
                     throw new Error('Error al obtener datos de áreas');

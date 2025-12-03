@@ -11,8 +11,19 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// Middleware para prevenir caché en todas las respuestas
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  next();
+});
+
 // Servir archivos estáticos (HTML, CSS, JS)
-app.use(express.static('.'));
+app.use(express.static('.', {
+  etag: false,
+  maxAge: 0
+}));
 
 // Configuración de la base de datos
 const dbConfig = {
