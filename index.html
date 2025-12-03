@@ -116,6 +116,9 @@
         const API_URL = `${BASE_URL}/api/stats`;
         const API_AREAS_URL = `${BASE_URL}/api/inscritos-por-area`;
 
+        // Estado de carga
+        let isLoading = true;
+
         // Colores para las barras
         const colors = [
             'bg-blue-500',
@@ -130,44 +133,57 @@
             'bg-cyan-500'
         ];
 
+        function showLoading() {
+            document.getElementById('totalInscritos').innerHTML = '<div class="inline-block animate-pulse bg-blue-300 rounded h-8 w-16"></div>';
+            document.getElementById('totalPagados').innerHTML = '<div class="inline-block animate-pulse bg-green-300 rounded h-8 w-16"></div>';
+            document.getElementById('porcentaje').innerHTML = '<div class="inline-block animate-pulse bg-purple-300 rounded h-8 w-12"></div>';
+        }
+
         async function fetchData() {
             const refreshBtn = document.getElementById('refreshBtn');
             const btnSvg = refreshBtn.querySelector('svg');
-            
+
             btnSvg.classList.add('animate-spin');
-            
+
+            if (isLoading) {
+                showLoading();
+            }
+
             try {
                 const response = await fetch(API_URL);
-                
+
                 if (!response.ok) {
                     throw new Error('Error al obtener datos');
                 }
-                
+
                 const data = await response.json();
-                
+
                 // Actualizar valores
                 document.getElementById('totalInscritos').textContent = data.totalInscritos || 0;
                 document.getElementById('totalPagados').textContent = data.totalPagados || 0;
-                
+
                 const inscritos = data.totalInscritos || 0;
                 const pagados = data.totalPagados || 0;
                 const porcentaje = pagados > 0 ? ((inscritos / pagados) * 100).toFixed(1) : 0;
-                
+
                 document.getElementById('porcentaje').textContent = porcentaje;
                 document.getElementById('progressBar').style.width = porcentaje + '%';
-                
+
                 document.getElementById('errorMsg').classList.add('hidden');
-                
+                isLoading = false;
+
             } catch (error) {
                 console.error('Error:', error);
-                
-                // Datos de ejemplo
-                document.getElementById('totalInscritos').textContent = 245;
-                document.getElementById('totalPagados').textContent = 189;
-                document.getElementById('porcentaje').textContent = 129.6;
-                document.getElementById('progressBar').style.width = '100%';
-                
+
+                // Mostrar mensaje de error sin datos de ejemplo
+                document.getElementById('totalInscritos').textContent = '--';
+                document.getElementById('totalPagados').textContent = '--';
+                document.getElementById('porcentaje').textContent = '--';
+                document.getElementById('progressBar').style.width = '0%';
+
+                document.getElementById('errorMsg').textContent = 'Error al cargar datos. Reintentando...';
                 document.getElementById('errorMsg').classList.remove('hidden');
+                isLoading = false;
             } finally {
                 // Actualizar hora
                 const now = new Date();
@@ -176,7 +192,7 @@
                     minute: '2-digit',
                     second: '2-digit'
                 });
-                
+
                 btnSvg.classList.remove('animate-spin');
             }
         }
@@ -184,26 +200,20 @@
         async function fetchAreaData() {
             try {
                 const response = await fetch(API_AREAS_URL);
-                
+
                 if (!response.ok) {
                     throw new Error('Error al obtener datos de áreas');
                 }
-                
+
                 const data = await response.json();
                 renderAreaChart(data.areas);
-                
+
             } catch (error) {
                 console.error('Error:', error);
-                
-                // Datos de ejemplo
-                const exampleData = [
-                    { area: 'Ingeniería Civil', total_inscritos: 8 },
-                    { area: 'Medicina Humana', total_inscritos: 6 },
-                    { area: 'Derecho', total_inscritos: 4 },
-                    { area: 'Contabilidad', total_inscritos: 3 },
-                    { area: 'Arquitectura', total_inscritos: 4 }
-                ];
-                renderAreaChart(exampleData);
+
+                // Mostrar mensaje de error
+                const chartContainer = document.getElementById('areaChart');
+                chartContainer.innerHTML = '<p class="text-center text-amber-600 py-4">Error al cargar áreas. Reintentando...</p>';
             }
         }
 
